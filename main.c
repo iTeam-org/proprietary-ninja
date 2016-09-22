@@ -11,19 +11,22 @@
 #define SCREEN_HEIGHT           600
 #define FRUITS_COUNT            10
 #define SCREEN_BG_COLOR(screen) SDL_MapRGB(screen->format, 200, 200, 200)
+#define FPS                     20
+#define BOUNCE_COEFF            0.75
 
 
 typedef enum        _e_fruit_model {
     FRUIT_MODEL_FIREFOX,
     FRUIT_MODEL_BLENDER,
-    FRUIT_MODEL_PYTHON,
+    FRUIT_MODEL_GIMP,
+    FRUIT_MODEL_VLC,
     FRUIT_MODEL_WINDOWS,
     FRUIT_MODEL_OSX,
     FRUIT_MODEL_LAST,
 }                   e_fruit_model;
 
 typedef struct      _s_fruit_model {
-    int             is_fruit;  // should the player cut it ?
+    int             is_fruit;  // whether the player should cut it
     char            *name;
     SDL_Surface     *img;
 }                   s_fruit_model;
@@ -39,8 +42,8 @@ typedef struct      _s_fruit {
 typedef struct      _s_game {
     SDL_Window      *window;
     SDL_Surface     *screen;
-    s_fruit_model   *models[FRUIT_MODEL_LAST];
-    s_fruit         *fruits[FRUITS_COUNT];
+    s_fruit_model   *models[FRUIT_MODEL_LAST];      // fruits models: various infos like img
+    s_fruit         *fruits[FRUITS_COUNT];          // active fruits (~ shown)
 }                   s_game;
 
 
@@ -70,6 +73,12 @@ s_fruit_model *fruit_model_new(int is_fruit, char *name)
 }
 
 
+int rand_int(int min, int max)
+{
+    return rand()%(max-min) + min;
+}
+
+
 s_fruit *fruit_new(s_fruit_model *model)
 {
     s_fruit *ret = NULL;
@@ -81,10 +90,10 @@ s_fruit *fruit_new(s_fruit_model *model)
         exit(1);
     }
 
-    ret->x = 0;
+    ret->x = rand_int(0, SCREEN_WIDTH);
     ret->y = 0;
-    ret->sx = 12;
-    ret->sy = 45;
+    ret->sx = rand_int(-40, 40);
+    ret->sy = rand_int(10, 60);
     ret->ax = 0;
     ret->ay = -2;
     ret->model = model;
@@ -105,6 +114,21 @@ void fruits_update_all(s_fruit **fruits)
 
             fruits[i]->x += fruits[i]->sx;
             fruits[i]->y += fruits[i]->sy;
+
+            // make it bounce
+            if (fruits[i]->x < 0)
+            {
+                fruits[i]->x = -fruits[i]->x;
+                fruits[i]->sx = -BOUNCE_COEFF * fruits[i]->sx;
+            }
+            if (fruits[i]->x+fruits[i]->model->img->w >= SCREEN_WIDTH)
+            {
+                fruits[i]->x = SCREEN_WIDTH - (fruits[i]->x+fruits[i]->model->img->w - SCREEN_WIDTH) - fruits[i]->model->img->w;
+                fruits[i]->sx = -BOUNCE_COEFF * fruits[i]->sx;
+            }
+
+            // if under the floor, remove it from the list of active fruits
+            // todo
         }
     }
 }
@@ -123,7 +147,6 @@ void fruit_blit_all(s_game *game)
             dst.w = game->fruits[i]->model->img->w;
             dst.h = game->fruits[i]->model->img->h;
 
-            SDL_FillRect(game->screen, NULL, SCREEN_BG_COLOR(game->screen));
             SDL_BlitSurface(game->fruits[i]->model->img, NULL, game->screen, &dst);
         }
     }
@@ -164,13 +187,10 @@ s_game *pn_init(void)
 
     game->models[FRUIT_MODEL_FIREFOX] = fruit_model_new(1, "Firefox");
     game->models[FRUIT_MODEL_BLENDER] = fruit_model_new(1, "Blender");
-    game->models[FRUIT_MODEL_PYTHON] = fruit_model_new(1, "Gimp");
-    game->models[FRUIT_MODEL_PYTHON] = fruit_model_new(1, "vlc");
+    game->models[FRUIT_MODEL_GIMP] = fruit_model_new(1, "Gimp");
+    game->models[FRUIT_MODEL_VLC] = fruit_model_new(1, "vlc");
     game->models[FRUIT_MODEL_WINDOWS] = fruit_model_new(0, "Windows");
     game->models[FRUIT_MODEL_OSX] = fruit_model_new(0, "OS X");
-    // vlc
-
-    game->fruits[0] = fruit_new(game->models[FRUIT_MODEL_FIREFOX]);
 
     return game;
 }
@@ -221,21 +241,28 @@ int main(int argc, char *argv[])
     s_game *game;
     int quit = 0;
 
+    srand(42);
     game = pn_init();
 
     while (!quit)
     {
+        // events
         pn_update_events(&quit);
 
+        // new fruit
+        if (rand_int(0, 100) == 0)
+            game->fruits[0] = fruit_new(game->models[rand_int(0, FRUIT_MODEL_LAST)]);
+
+        // update physics
         fruits_update_all(game->fruits);
 
+        // screen
+        SDL_FillRect(game->screen, NULL, SCREEN_BG_COLOR(game->screen));
         fruit_blit_all(game);
-
         SDL_UpdateWindowSurface(game->window);
 
-        // printf("%d %d | %d %d | %d %d\n", fruits[0]->ax, fruits[0]->ay, fruits[0]->sx, fruits[0]->sy, fruits[0]->x, fruits[0]->y);
-
-        SDL_Delay(1000/20);
+        // sleep
+        SDL_Delay(1000/FPS);
     }
 
     // todo free fruit
