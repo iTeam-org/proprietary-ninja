@@ -10,7 +10,7 @@
 #define SCREEN_WIDTH            800
 #define SCREEN_HEIGHT           600
 #define FRUITS_COUNT            10
-#define SCREEN_BG_COLOR(screen) SDL_MapRGB(screen->format, 200, 200, 200)
+#define SCREEN_BG_COLOR(screen) SDL_MapRGB(screen->format, 128, 128, 128)
 #define FPS                     20
 #define BOUNCE_COEFF            0.75
 
@@ -42,6 +42,7 @@ typedef struct      _s_fruit {
 typedef struct      _s_game {
     SDL_Window      *window;
     SDL_Surface     *screen;
+    SDL_Surface     *background;
     s_fruit_model   *models[FRUIT_MODEL_LAST];      // fruits models: various infos like img
     s_fruit         *fruits[FRUITS_COUNT];          // active fruits (~ shown)
 }                   s_game;
@@ -185,6 +186,13 @@ s_game *pn_init(void)
 
     game->screen = SDL_GetWindowSurface(game->window);
 
+    game->background = IMG_Load("res/background.jpg");
+    if (game->background == NULL)
+    {
+        fprintf(stderr, "Error IMG_Load() (pn_init()): %s\n", IMG_GetError());
+        exit(1);
+    }
+
     game->models[FRUIT_MODEL_FIREFOX] = fruit_model_new(1, "Firefox");
     game->models[FRUIT_MODEL_BLENDER] = fruit_model_new(1, "Blender");
     game->models[FRUIT_MODEL_GIMP] = fruit_model_new(1, "Gimp");
@@ -258,6 +266,7 @@ int main(int argc, char *argv[])
 
         // screen
         SDL_FillRect(game->screen, NULL, SCREEN_BG_COLOR(game->screen));
+        SDL_BlitSurface(game->background, NULL, game->screen, NULL);
         fruit_blit_all(game);
         SDL_UpdateWindowSurface(game->window);
 
