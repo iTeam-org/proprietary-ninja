@@ -47,12 +47,12 @@ s_game *pn_init(void)
         exit(1);
     }
 
-    fruit_model_append(game->models, fruit_model_new(1, "Firefox"));
-    fruit_model_append(game->models, fruit_model_new(1, "Blender"));
-    fruit_model_append(game->models, fruit_model_new(1, "Gimp"));
-    fruit_model_append(game->models, fruit_model_new(1, "vlc"));
-    fruit_model_append(game->models, fruit_model_new(0, "Windows"));
-    fruit_model_append(game->models, fruit_model_new(0, "OS X"));
+    fruit_model_append(game, fruit_model_new(1, "Firefox"));
+    fruit_model_append(game, fruit_model_new(1, "Blender"));
+    fruit_model_append(game, fruit_model_new(1, "Gimp"));
+    fruit_model_append(game, fruit_model_new(1, "vlc"));
+    fruit_model_append(game, fruit_model_new(0, "Windows"));
+    fruit_model_append(game, fruit_model_new(0, "OS X"));
 
     return game;
 }
@@ -112,15 +112,15 @@ int main(int argc, char *argv[])
         pn_update_events(&quit);
 
         // new fruit
-        if (rand_int(0, 100) == 0)
-           fruit_append(game->fruits, fruit_new(game->models[rand_int(0, 6)]));
+        if (utils_rand_int(0, 100) == 0)
+           fruit_append(game->fruits, fruit_new(game->models[utils_rand_int(0, game->loaded_models)]));
 
         // update physics
         fruit_update_all(game->fruits);
 
         // screen
         SDL_FillRect(game->screen, NULL, SCREEN_BG_COLOR(game->screen));
-        SDL_BlitSurface(game->background, NULL, game->screen, NULL);
+        utils_blit_at(game->background, game->screen, 0, 100);
         fruit_blit_all(game);
         SDL_UpdateWindowSurface(game->window);
 

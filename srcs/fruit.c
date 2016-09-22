@@ -38,15 +38,16 @@ s_fruit_model *fruit_model_new(int is_fruit, char *name)
     return ret;
 }
 
-void fruit_model_append(s_fruit_model **models, s_fruit_model *new)
+void fruit_model_append(s_game *game, s_fruit_model *new)
 {
     int i = 0;
 
     for (i = 0; i < FRUITS_MODEL_COUNT; ++i)
     {
-        if (models[i] == NULL)
+        if (game->models[i] == NULL)
         {
-            models[i] = new;
+            game->models[i] = new;
+            game->loaded_models ++;
             return;
         }
     }
@@ -70,10 +71,10 @@ s_fruit *fruit_new(s_fruit_model *model)
         exit(1);
     }
 
-    ret->x = rand_int(0, SCREEN_WIDTH);
+    ret->x = utils_rand_int(0, SCREEN_WIDTH);
     ret->y = 0;
-    ret->sx = rand_int(-30, 30);
-    ret->sy = rand_int(20, 60);
+    ret->sx = utils_rand_int(-30, 30);
+    ret->sy = utils_rand_int(20, 60);
     ret->ax = 0;
     ret->ay = -2;
     ret->model = model;
@@ -137,18 +138,10 @@ void fruit_update_all(s_fruit **fruits)
 void fruit_blit_all(s_game *game)
 {
     int i = 0;
-    SDL_Rect dst;
 
     for (i = 0; i < FRUITS_COUNT; ++i)
     {
         if (game->fruits[i] != NULL)
-        {
-            dst.x = game->fruits[i]->x;
-            dst.y = SCREEN_HEIGHT - game->fruits[i]->y;
-            dst.w = game->fruits[i]->model->img->w;
-            dst.h = game->fruits[i]->model->img->h;
-
-            SDL_BlitSurface(game->fruits[i]->model->img, NULL, game->screen, &dst);
-        }
+            utils_blit_at(game->fruits[i]->model->img, game->screen, game->fruits[i]->x, SCREEN_HEIGHT - game->fruits[i]->y);
     }
 }
