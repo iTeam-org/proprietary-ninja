@@ -1,5 +1,5 @@
 
-LIBS=-lSDL2 -lSDL2_image
+LIBS=-lSDL2 -lSDL2_image -lSDL2_ttf
 SRCS=srcs/*.c
 BIN=proprietary_ninja
 

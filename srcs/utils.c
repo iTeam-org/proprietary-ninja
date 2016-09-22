@@ -19,3 +19,19 @@ void utils_blit_at(SDL_Surface *src, SDL_Surface *dst, int x, int y)
 
     SDL_BlitSurface(src, NULL, dst, &pos);
 }
+
+void utils_blit_hud(s_game *game)
+{
+    SDL_Surface *text = NULL;
+    char buffer[1024];
+
+    text = TTF_RenderText_Blended(game->font_title, "Proprietary ninja", TEXT_COLOR);
+    utils_blit_at(text, game->screen, 200, 20);
+    SDL_FreeSurface(text);
+
+    sprintf(buffer, "%d live(s)", game->lives);
+    text = TTF_RenderText_Blended(game->font_text, buffer, TEXT_COLOR);
+    utils_blit_at(text, game->screen, 20, 60);
+    SDL_FreeSurface(text);
+}
+

@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "utils.h"
 #include "fruit.h"
@@ -53,6 +54,8 @@ s_game *pn_init(void)
     fruit_model_append(game, fruit_model_new(1, "vlc"));
     fruit_model_append(game, fruit_model_new(0, "Windows"));
     fruit_model_append(game, fruit_model_new(0, "OS X"));
+
+    game->lives = 3;
 
     return game;
 }
@@ -106,21 +109,34 @@ int main(int argc, char *argv[])
     srand(42);
     game = pn_init();
 
+    if (TTF_Init() == -1)
+        printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
+
+    game->font_title = TTF_OpenFont("res/Courier_New.ttf", 32);
+    if (game->font_title == NULL)
+        printf("Failed to load lazy font! SDL_ttf Error: %s\n", TTF_GetError());
+    TTF_SetFontStyle(game->font_title, TTF_STYLE_BOLD | TTF_STYLE_UNDERLINE);
+
+    game->font_text = TTF_OpenFont("res/Courier_New.ttf", 20);
+    if (game->font_text == NULL)
+        printf("Failed to load lazy font! SDL_ttf Error: %s\n", TTF_GetError());
+
     while (!quit)
     {
         // events
         pn_update_events(&quit);
 
         // new fruit
-        if (utils_rand_int(0, 100) == 0)
+        if (utils_rand_int(0, 50) == 0)
            fruit_append(game->fruits, fruit_new(game->models[utils_rand_int(0, game->loaded_models)]));
 
         // update physics
-        fruit_update_all(game->fruits);
+        fruit_update_all(game);
 
         // screen
         SDL_FillRect(game->screen, NULL, SCREEN_BG_COLOR(game->screen));
         utils_blit_at(game->background, game->screen, 0, 100);
+        utils_blit_hud(game);
         fruit_blit_all(game);
         SDL_UpdateWindowSurface(game->window);
 
@@ -128,7 +144,12 @@ int main(int argc, char *argv[])
         SDL_Delay(1000/FPS);
     }
 
-    // todo free fruit
+    TTF_CloseFont(game->font_title);
+    TTF_CloseFont(game->font_text);
+    TTF_Quit();
+    IMG_Quit();
+    SDL_FreeSurface(game->screen);
+    SDL_FreeSurface(game->background);
     SDL_DestroyWindow(game->window);
     SDL_Quit();
 

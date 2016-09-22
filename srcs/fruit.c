@@ -74,7 +74,7 @@ s_fruit *fruit_new(s_fruit_model *model)
     ret->x = utils_rand_int(0, SCREEN_WIDTH);
     ret->y = 0;
     ret->sx = utils_rand_int(-30, 30);
-    ret->sy = utils_rand_int(20, 60);
+    ret->sy = utils_rand_int(25, 55);
     ret->ax = 0;
     ret->ay = -2;
     ret->model = model;
@@ -103,9 +103,12 @@ void fruit_append(s_fruit **fruits, s_fruit *new)
 }
 
 
-void fruit_update_all(s_fruit **fruits)
+void fruit_update_all(s_game *game)
 {
     int i = 0;
+    s_fruit **fruits = NULL;
+
+    fruits = game->fruits;
 
     for (i = 0; i < FRUITS_COUNT; ++i)
     {
@@ -130,7 +133,14 @@ void fruit_update_all(s_fruit **fruits)
             }
 
             // if under the floor, remove it from the list of active fruits
-            // todo
+            if (fruits[i]->y < 0)
+            {
+                if (fruits[i]->model->is_fruit) // missed a fruit
+                    game->lives --;
+
+                free(fruits[i]);
+                fruits[i] = NULL;
+            }
         }
     }
 }

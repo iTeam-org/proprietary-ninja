@@ -2,6 +2,7 @@
 #define FRUIT_H_INCLUDED
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #define FRUITS_MODEL_COUNT      10
 #define FRUITS_COUNT            10
@@ -26,8 +27,11 @@ typedef struct      _s_game {
     SDL_Window      *window;
     SDL_Surface     *screen;
     SDL_Surface     *background;
+    TTF_Font        *font_title;
+    TTF_Font        *font_text;
     s_fruit_model   *models[FRUITS_MODEL_COUNT];    // fruits models: various infos like img
     int             loaded_models;
+    int             lives;
     s_fruit         *fruits[FRUITS_COUNT];          // active fruits (~ shown)
 }                   s_game;
 
@@ -37,7 +41,7 @@ void fruit_model_append(s_game *game, s_fruit_model *new);
 
 s_fruit *fruit_new(s_fruit_model *model);
 void fruit_append(s_fruit **fruits, s_fruit *new);
-void fruit_update_all(s_fruit **fruits);
+void fruit_update_all(s_game *game);
 void fruit_blit_all(s_game *game);
 
 
