@@ -9,6 +9,10 @@
 #define FPS                         20
 #define TEXT_COLOR                  (SDL_Color){0, 0, 0}
 
+#define SQUARE(x)                   ((x)*(x))
+#define DIST_SQUARE(x, y)           (SQUARE(x) + SQUARE(y))
+
+
 int utils_rand_int(int min, int max);
 SDL_Texture *utils_load_texture(SDL_Renderer *game_renderer, char *filepath);
 void utils_blit_at(SDL_Texture *src, SDL_Renderer *dst, int x, int y);

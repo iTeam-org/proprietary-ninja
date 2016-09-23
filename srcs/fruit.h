@@ -6,6 +6,7 @@
 
 #define FRUITS_MODEL_COUNT      10
 #define FRUITS_COUNT            10
+#define LINES_COUNT             100
 #define BOUNCE_COEFF            0.75
 
 
@@ -23,6 +24,14 @@ typedef struct      _s_fruit {
     s_fruit_model   *model;
 }                   s_fruit;
 
+typedef struct      _s_line {
+    int x1, y1, x2, y2;
+    int dx, dy;                                     // lenght in x and y. Auto calculated from coordinates
+    float a, b;                                     // equation y = a*x+b. Auto calculated from coordinates
+    float norm;                                     // auto calculated from coordinates
+    Uint32 timestamp;                               // creation timestamp
+}                   s_line;
+
 typedef struct      _s_game {
     SDL_Window      *window;
     SDL_Renderer    *renderer;
@@ -35,6 +44,7 @@ typedef struct      _s_game {
     int             loaded_models;
     int             lives;
     s_fruit         *fruits[FRUITS_COUNT];          // active fruits (~ shown)
+    s_line          *lines[LINES_COUNT];            // active lines
 }                   s_game;
 
 

@@ -7,6 +7,7 @@
 
 #include "utils.h"
 #include "fruit.h"
+#include "line.h"
 
 
 s_game *pn_init(void)
@@ -130,7 +131,7 @@ void pn_free(s_game *game)
 }
 
 
-void pn_update_events(int *quit)
+void pn_update_events(int *quit, s_game *game)
 {
     SDL_Event e;
 
@@ -150,27 +151,67 @@ void pn_update_events(int *quit)
                         *quit = 1;
                         break;
 
-                    // case SDLK_UP:
-                    //     gCurrentSurface = gKeyPressSurfaces[ KEY_PRESS_SURFACE_UP ];
-                    //     break;
-                    // case SDLK_DOWN:
-                    //     gCurrentSurface = gKeyPressSurfaces[ KEY_PRESS_SURFACE_DOWN ];
-                    //     break;
-
                     default:
                         break;
                 }
                 break;
 
-            // case SDL_MOUSEMOTION:
-            //     printf("%d %d\n", e.motion.x, e.motion.y);
-            //     break;
+            case SDL_MOUSEMOTION:
+                if (DIST_SQUARE(e.motion.xrel, e.motion.yrel) > SQUARE(MIN_DIST_TO_CUT))
+                {
+                    line_append(game, line_new(e.motion.x, e.motion.y, e.motion.x+e.motion.xrel, e.motion.y+e.motion.yrel));
+                    // printf("%d %d | %d %d\n", e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
+                }
+                break;
 
             default:
                 break;
         }
     }
 
+}
+
+void pn_check_collision(s_fruit *fruit, s_line *line)
+{
+    int line_unit_x = 0, line_unit_y = 0;  // unit vector of the line
+    int scalar_projection = 0;
+    int projection_x = 0, projection_y = 0;
+
+    line_unit_x = (line->x2 - line->x1) / line->norm;
+    line_unit_y = (line->y2 - line->y1) / line->norm;
+
+    scalar_projection = line->dx*line_unit_x + line->dy*line_unit_y;
+
+    projection_x = line->x1 + line_unit_x*scalar_projection;
+    projection_y = line->y1 + line_unit_y*scalar_projection;
+
+#define FRUIT_RADIUS 50
+
+    if (
+        (sqrt(DIST_SQUARE(projection_x, projection_y)) < FRUIT_RADIUS)  // the cut is within the fruit
+        && (SDL_GetTicks() - line->timestamp < 2 * 1000/FPS)  // and not too old
+    )
+    {
+        // todo
+        // collision !
+    }
+}
+
+void pn_check_all_collisions(s_game *game)
+{
+    int i = 0, j = 0;
+
+    for (i = 0; i < FRUITS_COUNT; ++i)
+    {
+        if (game->fruits[i] != NULL)
+        {
+            for (j = 0; j < LINES_COUNT; ++j)
+            {
+                if (game->lines[j] != NULL)
+                    pn_check_collision(game->fruits[i], game->lines[j]);
+            }
+        }
+    }
 }
 
 
@@ -185,7 +226,7 @@ int main(int argc, char *argv[])
     while (!quit)
     {
         // events
-        pn_update_events(&quit);
+        pn_update_events(&quit, game);
 
         // new fruit
         if (utils_rand_int(0, 50) == 0)
@@ -193,14 +234,15 @@ int main(int argc, char *argv[])
 
         // update physics
         fruit_update_all(game);
+        pn_check_all_collisions(game);
 
         // screen
-
         SDL_SetRenderDrawColor(game->renderer, 128, 128, 128, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(game->renderer);
         utils_blit_at(game->background, game->renderer, 0, 100);
         utils_blit_hud(game);
         fruit_blit_all(game);
+        line_blit_all(game);
         SDL_RenderPresent(game->renderer);
 
         // sleep
