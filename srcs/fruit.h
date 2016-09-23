@@ -12,7 +12,7 @@
 typedef struct      _s_fruit_model {
     int             is_fruit;                       // whether the player should cut it
     char            *name;
-    SDL_Surface     *img;
+    SDL_Texture     *img;
 }                   s_fruit_model;
 
 typedef struct      _s_fruit {
@@ -25,18 +25,20 @@ typedef struct      _s_fruit {
 
 typedef struct      _s_game {
     SDL_Window      *window;
-    SDL_Surface     *screen;
-    SDL_Surface     *background;
+    SDL_Renderer    *renderer;
+
+    SDL_Texture     *background;
     TTF_Font        *font_title;
     TTF_Font        *font_text;
     s_fruit_model   *models[FRUITS_MODEL_COUNT];    // fruits models: various infos like img
+
     int             loaded_models;
     int             lives;
     s_fruit         *fruits[FRUITS_COUNT];          // active fruits (~ shown)
 }                   s_game;
 
 
-s_fruit_model *fruit_model_new(int is_fruit, char *name);
+s_fruit_model *fruit_model_new(SDL_Renderer *game_renderer, int is_fruit, char *name);
 void fruit_model_append(s_game *game, s_fruit_model *new);
 
 s_fruit *fruit_new(s_fruit_model *model);

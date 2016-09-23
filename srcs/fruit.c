@@ -13,7 +13,7 @@
     fruit model
 */
 
-s_fruit_model *fruit_model_new(int is_fruit, char *name)
+s_fruit_model *fruit_model_new(SDL_Renderer *game_renderer, int is_fruit, char *name)
 {
     s_fruit_model *ret = NULL;
     char filename[1024];
@@ -28,12 +28,7 @@ s_fruit_model *fruit_model_new(int is_fruit, char *name)
     ret->is_fruit = is_fruit;
     ret->name = name;
     sprintf(filename, "res/%s.png", name);
-    ret->img = IMG_Load(filename);
-    if (ret->img == NULL)
-    {
-        fprintf(stderr, "Error IMG_Load() (fruit_model_new()): %s\n", IMG_GetError());
-        exit(1);
-    }
+    ret->img = utils_load_texture(game_renderer, filename);
 
     return ret;
 }
@@ -114,6 +109,10 @@ void fruit_update_all(s_game *game)
     {
         if (fruits[i] != NULL)
         {
+            int w = 0, h = 0;
+
+            SDL_QueryTexture(fruits[i]->model->img, NULL, NULL, &w, &h);
+
             fruits[i]->sx += fruits[i]->ax;
             fruits[i]->sy += fruits[i]->ay;
 
@@ -126,9 +125,9 @@ void fruit_update_all(s_game *game)
                 fruits[i]->x = -fruits[i]->x;
                 fruits[i]->sx = -BOUNCE_COEFF * fruits[i]->sx;
             }
-            if (fruits[i]->x+fruits[i]->model->img->w >= SCREEN_WIDTH)
+            if (fruits[i]->x + w >= SCREEN_WIDTH)
             {
-                fruits[i]->x = SCREEN_WIDTH - (fruits[i]->x+fruits[i]->model->img->w - SCREEN_WIDTH) - fruits[i]->model->img->w;
+                fruits[i]->x = SCREEN_WIDTH - (fruits[i]->x + w - SCREEN_WIDTH) - w;
                 fruits[i]->sx = -BOUNCE_COEFF * fruits[i]->sx;
             }
 
@@ -152,6 +151,11 @@ void fruit_blit_all(s_game *game)
     for (i = 0; i < FRUITS_COUNT; ++i)
     {
         if (game->fruits[i] != NULL)
-            utils_blit_at(game->fruits[i]->model->img, game->screen, game->fruits[i]->x, SCREEN_HEIGHT - game->fruits[i]->y);
+        {
+            utils_blit_at(
+                game->fruits[i]->model->img, game->renderer,
+                game->fruits[i]->x, SCREEN_HEIGHT - game->fruits[i]->y
+            );
+        }
     }
 }

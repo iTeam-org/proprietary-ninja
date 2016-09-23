@@ -51,14 +51,14 @@ s_game *pn_init(void)
         exit(1);
     }
 
-    game->screen = SDL_GetWindowSurface(game->window);
-
-    game->background = IMG_Load("res/background.jpg");
-    if (game->background == NULL)
+    game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED);
+    if (game->renderer == NULL)
     {
-        fprintf(stderr, "Error IMG_Load() (pn_init()): %s\n", IMG_GetError());
+        fprintf(stderr, "Error SDL_CreateRenderer(): %s\n", SDL_GetError());
         exit(1);
     }
+
+    game->background = utils_load_texture(game->renderer, "res/background.jpg");
 
     /*
         SDL_ttf
@@ -80,12 +80,12 @@ s_game *pn_init(void)
         Fruits
     */
 
-    fruit_model_append(game, fruit_model_new(1, "Firefox"));
-    fruit_model_append(game, fruit_model_new(1, "Blender"));
-    fruit_model_append(game, fruit_model_new(1, "Gimp"));
-    fruit_model_append(game, fruit_model_new(1, "vlc"));
-    fruit_model_append(game, fruit_model_new(0, "Windows"));
-    fruit_model_append(game, fruit_model_new(0, "OS X"));
+    fruit_model_append(game, fruit_model_new(game->renderer, 1, "Firefox"));
+    fruit_model_append(game, fruit_model_new(game->renderer, 1, "Blender"));
+    fruit_model_append(game, fruit_model_new(game->renderer, 1, "Gimp"));
+    fruit_model_append(game, fruit_model_new(game->renderer, 1, "vlc"));
+    fruit_model_append(game, fruit_model_new(game->renderer, 0, "Windows"));
+    fruit_model_append(game, fruit_model_new(game->renderer, 0, "OS X"));
 
     /*
         Miscs
@@ -104,7 +104,7 @@ void pn_free(s_game *game)
     {
         if (game->models[i] != NULL)
         {
-            SDL_FreeSurface(game->models[i]->img);
+            SDL_DestroyTexture(game->models[i]->img);
             free(game->models[i]);
         }
     }
@@ -117,8 +117,9 @@ void pn_free(s_game *game)
 
     TTF_CloseFont(game->font_title);
     TTF_CloseFont(game->font_text);
-    SDL_FreeSurface(game->screen);
-    SDL_FreeSurface(game->background);
+    SDL_DestroyTexture(game->background);
+
+    SDL_DestroyRenderer(game->renderer);
     SDL_DestroyWindow(game->window);
 
     free(game);
@@ -194,11 +195,13 @@ int main(int argc, char *argv[])
         fruit_update_all(game);
 
         // screen
-        SDL_FillRect(game->screen, NULL, SCREEN_BG_COLOR(game->screen));
-        utils_blit_at(game->background, game->screen, 0, 100);
+
+        SDL_SetRenderDrawColor(game->renderer, 128, 128, 128, SDL_ALPHA_OPAQUE);
+        SDL_RenderClear(game->renderer);
+        utils_blit_at(game->background, game->renderer, 0, 100);
         utils_blit_hud(game);
         fruit_blit_all(game);
-        SDL_UpdateWindowSurface(game->window);
+        SDL_RenderPresent(game->renderer);
 
         // sleep
         SDL_Delay(1000/FPS);
