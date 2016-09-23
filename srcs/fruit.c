@@ -68,8 +68,8 @@ s_fruit *fruit_new(s_fruit_model *model)
 
     ret->x = utils_rand_int(0, SCREEN_WIDTH);
     ret->y = 0;
-    ret->sx = utils_rand_int(-30, 30);
-    ret->sy = utils_rand_int(25, 55);
+    ret->sx = utils_rand_int(-25, 25);
+    ret->sy = utils_rand_int(20, 50);
     ret->ax = 0;
     ret->ay = -2;
     ret->model = model;

@@ -218,6 +218,8 @@ void pn_check_all_collisions(s_game *game)
 int main(int argc, char *argv[])
 {
     s_game *game;
+    Uint32 timestamp = 0;
+    int should_sleep = 0;
     int quit = 0;
 
     srand(42);
@@ -225,6 +227,8 @@ int main(int argc, char *argv[])
 
     while (!quit)
     {
+        timestamp = SDL_GetTicks();
+
         // events
         pn_update_events(&quit, game);
 
@@ -246,7 +250,10 @@ int main(int argc, char *argv[])
         SDL_RenderPresent(game->renderer);
 
         // sleep
-        SDL_Delay(1000/FPS);
+        should_sleep = 1000/FPS - (SDL_GetTicks() - timestamp);
+        printf("%d\n", should_sleep);
+        if (should_sleep > 0)
+            SDL_Delay(should_sleep);
     }
 
     pn_free(game);

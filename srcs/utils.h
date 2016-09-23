@@ -6,7 +6,7 @@
 
 #define SCREEN_WIDTH                800
 #define SCREEN_HEIGHT               600
-#define FPS                         20
+#define FPS                         25
 #define TEXT_COLOR                  (SDL_Color){0, 0, 0}
 
 #define SQUARE(x)                   ((x)*(x))
