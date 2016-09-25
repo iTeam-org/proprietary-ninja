@@ -174,21 +174,30 @@ void pn_update_events(int *quit, s_game *game)
 void pn_check_collision(s_fruit *fruit, s_line *line)
 {
     int line_unit_x = 0, line_unit_y = 0;  // unit vector of the line
+    int line2fruit_dx = 0, line2fruit_dy = 0;
     int scalar_projection = 0;
     int projection_x = 0, projection_y = 0;
+
+    // project the center of the fruit onto the cuting line
 
     line_unit_x = (line->x2 - line->x1) / line->norm;
     line_unit_y = (line->y2 - line->y1) / line->norm;
 
-    scalar_projection = line->dx*line_unit_x + line->dy*line_unit_y;
+    line2fruit_dx = fruit->x - line->x1;
+    line2fruit_dy = fruit->y - line->y1;
+
+    scalar_projection = line2fruit_dx*line_unit_x + line2fruit_dy*line_unit_y;
 
     projection_x = line->x1 + line_unit_x*scalar_projection;
     projection_y = line->y1 + line_unit_y*scalar_projection;
 
+    // if the projected center of the fruit (which is on the cuting line) is
+    // inside the fruit, the fruit is sliced
+
 #define FRUIT_RADIUS 50
 
     if (
-        (sqrt(DIST_SQUARE(projection_x, projection_y)) < FRUIT_RADIUS)  // the cut is within the fruit
+        (sqrt(DIST_SQUARE(projection_x-fruit->x, projection_y-fruit->y)) < FRUIT_RADIUS)  // the cut is within the fruit
         && (SDL_GetTicks() - line->timestamp < 2 * 1000/FPS)  // and not too old
     )
     {
@@ -251,7 +260,6 @@ int main(int argc, char *argv[])
 
         // sleep
         should_sleep = 1000/FPS - (SDL_GetTicks() - timestamp);
-        printf("%d\n", should_sleep);
         if (should_sleep > 0)
             SDL_Delay(should_sleep);
     }
