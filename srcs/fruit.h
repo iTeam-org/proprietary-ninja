@@ -8,18 +8,20 @@
 #define FRUITS_COUNT            10
 #define LINES_COUNT             100
 #define BOUNCE_COEFF            0.75
+#define FRUIT_RADIUS            50
 
 
 typedef struct      _s_fruit_model {
-    int             is_fruit;                       // whether the player should cut it
     char            *name;
     SDL_Texture     *img;
+    int             is_fruit;                       // whether the player should cut it
+    int             radius;                         // radius of fruit in px - used for collision
 }                   s_fruit_model;
 
 typedef struct      _s_fruit {
-    int x, y;                                       // position
-    int sx, sy;                                     // speed
-    int ax, ay;                                     // acceleration
+    float x, y;                                     // position - center of fruit
+    float sx, sy;                                   // speed
+    float ax, ay;                                   // acceleration
 
     s_fruit_model   *model;
 }                   s_fruit;

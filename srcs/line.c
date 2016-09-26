@@ -20,6 +20,10 @@ s_line *line_new(int x1, int y1, int x2, int y2)
         exit(1);
     }
 
+    // protect against edge cases
+    if (x1 == x2)
+        x2 ++;
+
     ret->x1 = x1;
     ret->y1 = y1;
     ret->x2 = x2;

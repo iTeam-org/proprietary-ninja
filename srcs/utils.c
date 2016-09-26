@@ -8,7 +8,10 @@
 
 int utils_rand_int(int min, int max)
 {
-    return rand()%(max-min) + min;
+    if (min == max)
+        return min;
+    else
+        return rand()%(max-min) + min;
 }
 
 SDL_Texture *utils_load_texture(SDL_Renderer *game_renderer, char *filepath)

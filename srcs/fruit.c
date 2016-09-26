@@ -25,10 +25,11 @@ s_fruit_model *fruit_model_new(SDL_Renderer *game_renderer, int is_fruit, char *
         exit(1);
     }
 
-    ret->is_fruit = is_fruit;
     ret->name = name;
     sprintf(filename, "res/%s.png", name);
     ret->img = utils_load_texture(game_renderer, filename);
+    ret->is_fruit = is_fruit;
+    ret->radius = FRUIT_RADIUS;
 
     return ret;
 }
@@ -67,11 +68,11 @@ s_fruit *fruit_new(s_fruit_model *model)
     }
 
     ret->x = utils_rand_int(0, SCREEN_WIDTH);
-    ret->y = 0;
+    ret->y = SCREEN_HEIGHT-0;
     ret->sx = utils_rand_int(-25, 25);
-    ret->sy = utils_rand_int(20, 50);
+    ret->sy = utils_rand_int(-30, -10);
     ret->ax = 0;
-    ret->ay = -2;
+    ret->ay = 1;
     ret->model = model;
 
     printf("[Debug] new fruit\n");
@@ -109,9 +110,12 @@ void fruit_update_all(s_game *game)
     {
         if (fruits[i] != NULL)
         {
-            int w = 0, h = 0;
+            int w = 0, h = 0, radius = 0;
 
             SDL_QueryTexture(fruits[i]->model->img, NULL, NULL, &w, &h);
+            radius = fruits[i]->model->radius;
+
+            // apply physics (basic)
 
             fruits[i]->sx += fruits[i]->ax;
             fruits[i]->sy += fruits[i]->ay;
@@ -119,20 +123,22 @@ void fruit_update_all(s_game *game)
             fruits[i]->x += fruits[i]->sx;
             fruits[i]->y += fruits[i]->sy;
 
+            // apply physics (collisons)
+
             // make it bounce
-            if (fruits[i]->x < 0)
+            if (fruits[i]->x - radius < 0)
             {
-                fruits[i]->x = -fruits[i]->x;
+                fruits[i]->x = - (fruits[i]->x - radius) + radius;
                 fruits[i]->sx = -BOUNCE_COEFF * fruits[i]->sx;
             }
-            if (fruits[i]->x + w >= SCREEN_WIDTH)
+            if (fruits[i]->x + radius >= SCREEN_WIDTH)
             {
-                fruits[i]->x = SCREEN_WIDTH - (fruits[i]->x + w - SCREEN_WIDTH) - w;
+                fruits[i]->x = SCREEN_WIDTH - radius - (fruits[i]->x + radius - SCREEN_WIDTH);
                 fruits[i]->sx = -BOUNCE_COEFF * fruits[i]->sx;
             }
 
             // if under the floor, remove it from the list of active fruits
-            if (fruits[i]->y < 0)
+            if (fruits[i]->y - radius >= SCREEN_HEIGHT)
             {
                 if (fruits[i]->model->is_fruit) // missed a fruit
                     game->lives --;
@@ -154,7 +160,7 @@ void fruit_blit_all(s_game *game)
         {
             utils_blit_at(
                 game->fruits[i]->model->img, game->renderer,
-                game->fruits[i]->x, SCREEN_HEIGHT - game->fruits[i]->y
+                game->fruits[i]->x - game->fruits[i]->model->radius, game->fruits[i]->y - game->fruits[i]->model->radius
             );
         }
     }

@@ -173,9 +173,9 @@ void pn_update_events(int *quit, s_game *game)
 
 void pn_check_collision(s_fruit *fruit, s_line *line)
 {
-    int line_unit_x = 0, line_unit_y = 0;  // unit vector of the line
+    float line_unit_x = 0, line_unit_y = 0;  // unit vector of the line
     int line2fruit_dx = 0, line2fruit_dy = 0;
-    int scalar_projection = 0;
+    float scalar_projection = 0;
     int projection_x = 0, projection_y = 0;
 
     // project the center of the fruit onto the cuting line
@@ -194,10 +194,9 @@ void pn_check_collision(s_fruit *fruit, s_line *line)
     // if the projected center of the fruit (which is on the cuting line) is
     // inside the fruit, the fruit is sliced
 
-#define FRUIT_RADIUS 50
-
     if (
-        (sqrt(DIST_SQUARE(projection_x-fruit->x, projection_y-fruit->y)) < FRUIT_RADIUS)  // the cut is within the fruit
+        (scalar_projection > 0) && (scalar_projection < line->norm)  // the projection is within the line
+        && (DIST_SQUARE(projection_x-fruit->x, projection_y-fruit->y) < SQUARE(fruit->model->radius))  // the projection is within the fruit
         && (SDL_GetTicks() - line->timestamp < 2 * 1000/FPS)  // and not too old
     )
     {
