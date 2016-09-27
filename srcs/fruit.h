@@ -23,6 +23,8 @@ typedef struct      _s_fruit {
     float sx, sy;                                   // speed
     float ax, ay;                                   // acceleration
 
+    int is_sliced;                                  // used to know if it can be sliced again
+
     s_fruit_model   *model;
 }                   s_fruit;
 
@@ -34,17 +36,26 @@ typedef struct      _s_line {
     Uint32 timestamp;                               // creation timestamp
 }                   s_line;
 
+typedef struct      _s_vector {
+    int x, y;
+}                   s_vector;
+
 typedef struct      _s_game {
     SDL_Window      *window;
     SDL_Renderer    *renderer;
 
     SDL_Texture     *background;
+    SDL_Texture     *knife;                         // a knife to cut fruits (read: a net to capture open source logos)
+    s_vector        knife_size;
     TTF_Font        *font_title;
     TTF_Font        *font_text;
     s_fruit_model   *models[FRUITS_MODEL_COUNT];    // fruits models: various infos like img
 
     int             loaded_models;
     int             lives;
+    int             points;
+    int             last_fruit_sliced;              // timestamp. Used for combos
+    s_vector        mouse;
     s_fruit         *fruits[FRUITS_COUNT];          // active fruits (~ shown)
     s_line          *lines[LINES_COUNT];            // active lines
 }                   s_game;

@@ -70,12 +70,11 @@ s_fruit *fruit_new(s_fruit_model *model)
     ret->x = utils_rand_int(0, SCREEN_WIDTH);
     ret->y = SCREEN_HEIGHT-0;
     ret->sx = utils_rand_int(-25, 25);
-    ret->sy = utils_rand_int(-30, -10);
+    ret->sy = utils_rand_int(-30, -15);
     ret->ax = 0;
     ret->ay = 1;
+    ret->is_sliced = 0;
     ret->model = model;
-
-    printf("[Debug] new fruit\n");
 
     return ret;
 }
@@ -138,7 +137,10 @@ void fruit_update_all(s_game *game)
             }
 
             // if under the floor, remove it from the list of active fruits
-            if (fruits[i]->y - radius >= SCREEN_HEIGHT)
+            if (
+                (fruits[i]->y - radius >= SCREEN_HEIGHT)
+                && (! fruits[i]->is_sliced)
+            )
             {
                 if (fruits[i]->model->is_fruit) // missed a fruit
                     game->lives --;
@@ -158,6 +160,11 @@ void fruit_blit_all(s_game *game)
     {
         if (game->fruits[i] != NULL)
         {
+            if (game->fruits[i]->is_sliced)
+                SDL_SetTextureColorMod(game->fruits[i]->model->img, 128, 128, 128);
+            else
+                SDL_SetTextureColorMod(game->fruits[i]->model->img, 255, 255, 255);
+
             utils_blit_at(
                 game->fruits[i]->model->img, game->renderer,
                 game->fruits[i]->x - game->fruits[i]->model->radius, game->fruits[i]->y - game->fruits[i]->model->radius

@@ -62,4 +62,9 @@ void utils_blit_hud(s_game *game)
     text = TTF_RenderText_Blended(game->font_text, buffer, TEXT_COLOR);
     utils_blit_at(SDL_CreateTextureFromSurface(game->renderer, text), game->renderer, 20, 60); // todo enhance this
     SDL_FreeSurface(text);
+
+    sprintf(buffer, "%d point(s)", game->points);
+    text = TTF_RenderText_Blended(game->font_text, buffer, TEXT_COLOR);
+    utils_blit_at(SDL_CreateTextureFromSurface(game->renderer, text), game->renderer, SCREEN_WIDTH-text->w-20, 60); // todo enhance this
+    SDL_FreeSurface(text);
 }

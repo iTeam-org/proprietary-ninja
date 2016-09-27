@@ -60,6 +60,8 @@ s_game *pn_init(void)
     }
 
     game->background = utils_load_texture(game->renderer, "res/background.jpg");
+    game->knife = utils_load_texture(game->renderer, "res/net.png");
+    SDL_QueryTexture(game->knife, NULL, NULL, &game->knife_size.x, &game->knife_size.y);
 
     /*
         SDL_ttf
@@ -119,6 +121,7 @@ void pn_free(s_game *game)
     TTF_CloseFont(game->font_title);
     TTF_CloseFont(game->font_text);
     SDL_DestroyTexture(game->background);
+    SDL_DestroyTexture(game->knife);
 
     SDL_DestroyRenderer(game->renderer);
     SDL_DestroyWindow(game->window);
@@ -130,8 +133,21 @@ void pn_free(s_game *game)
     SDL_Quit();
 }
 
+void pn_events_handle_movement(s_game *game, int x, int y, int xrel, int yrel)
+{
+    game->mouse.x = x;
+    game->mouse.y = y;
 
-void pn_update_events(int *quit, s_game *game)
+    if (
+        DIST_SQUARE(xrel, yrel) > SQUARE(MIN_DIST_TO_CUT)
+        && ((x != xrel) && (y != yrel))  // happens on first loop
+    )
+    {
+        line_append(game, line_new(x, y, x+xrel, y+yrel));
+    }
+}
+
+void pn_events_update(int *quit, s_game *game)
 {
     SDL_Event e;
 
@@ -157,21 +173,25 @@ void pn_update_events(int *quit, s_game *game)
                 break;
 
             case SDL_MOUSEMOTION:
-                if (DIST_SQUARE(e.motion.xrel, e.motion.yrel) > SQUARE(MIN_DIST_TO_CUT))
-                {
-                    line_append(game, line_new(e.motion.x, e.motion.y, e.motion.x+e.motion.xrel, e.motion.y+e.motion.yrel));
-                    // printf("%d %d | %d %d\n", e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
-                }
+                pn_events_handle_movement(game, e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
+                break;
+
+            case SDL_FINGERMOTION:
+                pn_events_handle_movement(game, e.tfinger.x, e.tfinger.y, e.tfinger.dx, e.tfinger.dy);
                 break;
 
             default:
                 break;
         }
     }
-
 }
 
-void pn_check_collision(s_fruit *fruit, s_line *line)
+/*
+    Return
+        0 if no collision
+        1 if collision
+*/
+int pn_check_collision(s_fruit *fruit, s_line *line)
 {
     float line_unit_x = 0, line_unit_y = 0;  // unit vector of the line
     int line2fruit_dx = 0, line2fruit_dy = 0;
@@ -200,9 +220,10 @@ void pn_check_collision(s_fruit *fruit, s_line *line)
         && (SDL_GetTicks() - line->timestamp < 2 * 1000/FPS)  // and not too old
     )
     {
-        // todo
-        // collision !
+        return 1;
     }
+
+    return 0;
 }
 
 void pn_check_all_collisions(s_game *game)
@@ -216,7 +237,17 @@ void pn_check_all_collisions(s_game *game)
             for (j = 0; j < LINES_COUNT; ++j)
             {
                 if (game->lines[j] != NULL)
-                    pn_check_collision(game->fruits[i], game->lines[j]);
+                {
+                    if (pn_check_collision(game->fruits[i], game->lines[j]))
+                    {
+                        game->last_fruit_sliced = SDL_GetTicks();
+
+                        game->fruits[i]->is_sliced = 1;
+
+                        game->points += 100;
+                        // todo more points in function of number of fruits sliced (combos)
+                    }
+                }
             }
         }
     }
@@ -238,23 +269,34 @@ int main(int argc, char *argv[])
         timestamp = SDL_GetTicks();
 
         // events
-        pn_update_events(&quit, game);
+        pn_events_update(&quit, game);
 
         // new fruit
-        if (utils_rand_int(0, 50) == 0)
+        if (utils_rand_int(0, 1000) < 25)
            fruit_append(game->fruits, fruit_new(game->models[utils_rand_int(0, game->loaded_models)]));
 
         // update physics
         fruit_update_all(game);
         pn_check_all_collisions(game);
 
-        // screen
+        /*
+            screen
+        */
+
+        // bg
         SDL_SetRenderDrawColor(game->renderer, 128, 128, 128, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(game->renderer);
         utils_blit_at(game->background, game->renderer, 0, 100);
+
+        // title, score, ...
         utils_blit_hud(game);
+
+        // fruits, lines and knife
         fruit_blit_all(game);
         line_blit_all(game);
+        utils_blit_at(game->knife, game->renderer, game->mouse.x-game->knife_size.x/4, game->mouse.y-game->knife_size.y/3);
+
+        // render
         SDL_RenderPresent(game->renderer);
 
         // sleep
