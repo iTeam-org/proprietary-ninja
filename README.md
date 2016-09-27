@@ -1,11 +1,16 @@
 
 # proprietary-ninja
 
-Small game inspired by fruit ninja, to be played on a touch screen (but you will still be able to play with a mouse).
+Small game inspired by logo ninja, to be played on a touch screen (but you will still be able to play with a mouse).
 
 # How to enjoy this master piece ?
 
-Install [SDL2](http://libsdl.org/), [SDL2-image](https://www.libsdl.org/projects/SDL_image/) and [SDL2-ttf](https://www.libsdl.org/projects/SDL_ttf/).
+Install some libs:
+
+* [SDL2](http://libsdl.org/)
+* [SDL2-image](https://www.libsdl.org/projects/SDL_image/)
+* [SDL2-ttf](https://www.libsdl.org/projects/SDL_ttf/)
+
 You will also need a C compiler and make.
 
 If you are using Linux, it should be something like:

@@ -1,32 +1,32 @@
-#ifndef FRUIT_H_INCLUDED
-#define FRUIT_H_INCLUDED
+#ifndef logo_H_INCLUDED
+#define logo_H_INCLUDED
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-#define FRUITS_MODEL_COUNT      10
-#define FRUITS_COUNT            10
+#define LOGO_MODELS_COUNT      10
+#define LOGOS_COUNT            10
 #define LINES_COUNT             100
 #define BOUNCE_COEFF            0.75
-#define FRUIT_RADIUS            50
+#define LOGO_RADIUS            50
 
 
-typedef struct      _s_fruit_model {
+typedef struct      _s_logo_model {
     char            *name;
     SDL_Texture     *img;
-    int             is_fruit;                       // whether the player should cut it
-    int             radius;                         // radius of fruit in px - used for collision
-}                   s_fruit_model;
+    int             is_open_source;                 // whether the player should capture it
+    int             radius;                         // radius of logo in px - used for collision
+}                   s_logo_model;
 
-typedef struct      _s_fruit {
-    float x, y;                                     // position - center of fruit
+typedef struct      _s_logo {
+    float x, y;                                     // position - center of logo
     float sx, sy;                                   // speed
     float ax, ay;                                   // acceleration
 
-    int is_sliced;                                  // used to know if it can be sliced again
+    int is_captured;
 
-    s_fruit_model   *model;
-}                   s_fruit;
+    s_logo_model   *model;
+}                   s_logo;
 
 typedef struct      _s_line {
     int x1, y1, x2, y2;
@@ -45,29 +45,29 @@ typedef struct      _s_game {
     SDL_Renderer    *renderer;
 
     SDL_Texture     *background;
-    SDL_Texture     *knife;                         // a knife to cut fruits (read: a net to capture open source logos)
-    s_vector        knife_size;
+    SDL_Texture     *net;
+    s_vector        net_size;
     TTF_Font        *font_title;
     TTF_Font        *font_text;
-    s_fruit_model   *models[FRUITS_MODEL_COUNT];    // fruits models: various infos like img
+    s_logo_model    *models[LOGO_MODELS_COUNT];     // logos models: various infos like img
 
     int             loaded_models;
     int             lives;
     int             points;
-    int             last_fruit_sliced;              // timestamp. Used for combos
+    int             last_logo_captured;             // timestamp. Used for combos
     s_vector        mouse;
-    s_fruit         *fruits[FRUITS_COUNT];          // active fruits (~ shown)
+    s_logo         *logos[LOGOS_COUNT];             // active logos (~ shown)
     s_line          *lines[LINES_COUNT];            // active lines
 }                   s_game;
 
 
-s_fruit_model *fruit_model_new(SDL_Renderer *game_renderer, int is_fruit, char *name);
-void fruit_model_append(s_game *game, s_fruit_model *new);
+s_logo_model *logo_model_new(SDL_Renderer *game_renderer, int is_open_source, char *name);
+void logo_model_append(s_game *game, s_logo_model *new);
 
-s_fruit *fruit_new(s_fruit_model *model);
-void fruit_append(s_fruit **fruits, s_fruit *new);
-void fruit_update_all(s_game *game);
-void fruit_blit_all(s_game *game);
+s_logo *logo_new(s_logo_model *model);
+void logo_append(s_logo **logos, s_logo *new);
+void logo_update_all(s_game *game);
+void logo_blit_all(s_game *game);
 
 
 #endif

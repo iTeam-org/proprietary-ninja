@@ -60,8 +60,8 @@ s_game *pn_init(void)
     }
 
     game->background = utils_load_texture(game->renderer, "res/background.jpg");
-    game->knife = utils_load_texture(game->renderer, "res/net.png");
-    SDL_QueryTexture(game->knife, NULL, NULL, &game->knife_size.x, &game->knife_size.y);
+    game->net = utils_load_texture(game->renderer, "res/net.png");
+    SDL_QueryTexture(game->net, NULL, NULL, &game->net_size.x, &game->net_size.y);
 
     /*
         SDL_ttf
@@ -80,15 +80,15 @@ s_game *pn_init(void)
         printf("Failed to load lazy font! SDL_ttf Error: %s\n", TTF_GetError());
 
     /*
-        Fruits
+        logos
     */
 
-    fruit_model_append(game, fruit_model_new(game->renderer, 1, "Firefox"));
-    fruit_model_append(game, fruit_model_new(game->renderer, 1, "Blender"));
-    fruit_model_append(game, fruit_model_new(game->renderer, 1, "Gimp"));
-    fruit_model_append(game, fruit_model_new(game->renderer, 1, "vlc"));
-    fruit_model_append(game, fruit_model_new(game->renderer, 0, "Windows"));
-    fruit_model_append(game, fruit_model_new(game->renderer, 0, "OS X"));
+    logo_model_append(game, logo_model_new(game->renderer, 1, "Firefox"));
+    logo_model_append(game, logo_model_new(game->renderer, 1, "Blender"));
+    logo_model_append(game, logo_model_new(game->renderer, 1, "Gimp"));
+    logo_model_append(game, logo_model_new(game->renderer, 1, "vlc"));
+    logo_model_append(game, logo_model_new(game->renderer, 0, "Windows"));
+    logo_model_append(game, logo_model_new(game->renderer, 0, "OS X"));
 
     /*
         Miscs
@@ -103,7 +103,7 @@ void pn_free(s_game *game)
 {
     int i = 0;
 
-    for (i = 0; i < FRUITS_MODEL_COUNT; ++i)
+    for (i = 0; i < LOGO_MODELS_COUNT; ++i)
     {
         if (game->models[i] != NULL)
         {
@@ -112,16 +112,16 @@ void pn_free(s_game *game)
         }
     }
 
-    for (i = 0; i < FRUITS_COUNT; ++i)
+    for (i = 0; i < LOGOS_COUNT; ++i)
     {
-        if (game->fruits[i] != NULL)
-            free(game->fruits[i]);
+        if (game->logos[i] != NULL)
+            free(game->logos[i]);
     }
 
     TTF_CloseFont(game->font_title);
     TTF_CloseFont(game->font_text);
     SDL_DestroyTexture(game->background);
-    SDL_DestroyTexture(game->knife);
+    SDL_DestroyTexture(game->net);
 
     SDL_DestroyRenderer(game->renderer);
     SDL_DestroyWindow(game->window);
@@ -191,32 +191,32 @@ void pn_events_update(int *quit, s_game *game)
         0 if no collision
         1 if collision
 */
-int pn_check_collision(s_fruit *fruit, s_line *line)
+int pn_check_collision(s_logo *logo, s_line *line)
 {
     float line_unit_x = 0, line_unit_y = 0;  // unit vector of the line
-    int line2fruit_dx = 0, line2fruit_dy = 0;
+    int line2logo_dx = 0, line2logo_dy = 0;
     float scalar_projection = 0;
     int projection_x = 0, projection_y = 0;
 
-    // project the center of the fruit onto the cuting line
+    // project the center of the logo onto the cuting line
 
     line_unit_x = (line->x2 - line->x1) / line->norm;
     line_unit_y = (line->y2 - line->y1) / line->norm;
 
-    line2fruit_dx = fruit->x - line->x1;
-    line2fruit_dy = fruit->y - line->y1;
+    line2logo_dx = logo->x - line->x1;
+    line2logo_dy = logo->y - line->y1;
 
-    scalar_projection = line2fruit_dx*line_unit_x + line2fruit_dy*line_unit_y;
+    scalar_projection = line2logo_dx*line_unit_x + line2logo_dy*line_unit_y;
 
     projection_x = line->x1 + line_unit_x*scalar_projection;
     projection_y = line->y1 + line_unit_y*scalar_projection;
 
-    // if the projected center of the fruit (which is on the cuting line) is
-    // inside the fruit, the fruit is sliced
+    // if the projected center of the logo (which is on the cuting line) is
+    // inside the logo, the logo is sliced
 
     if (
         (scalar_projection > 0) && (scalar_projection < line->norm)  // the projection is within the line
-        && (DIST_SQUARE(projection_x-fruit->x, projection_y-fruit->y) < SQUARE(fruit->model->radius))  // the projection is within the fruit
+        && (DIST_SQUARE(projection_x-logo->x, projection_y-logo->y) < SQUARE(logo->model->radius))  // the projection is within the logo
         && (SDL_GetTicks() - line->timestamp < 2 * 1000/FPS)  // and not too old
     )
     {
@@ -230,22 +230,22 @@ void pn_check_all_collisions(s_game *game)
 {
     int i = 0, j = 0;
 
-    for (i = 0; i < FRUITS_COUNT; ++i)
+    for (i = 0; i < LOGOS_COUNT; ++i)
     {
-        if (game->fruits[i] != NULL)
+        if (game->logos[i] != NULL)
         {
             for (j = 0; j < LINES_COUNT; ++j)
             {
                 if (game->lines[j] != NULL)
                 {
-                    if (pn_check_collision(game->fruits[i], game->lines[j]))
+                    if (pn_check_collision(game->logos[i], game->lines[j]))
                     {
-                        game->last_fruit_sliced = SDL_GetTicks();
+                        game->last_logo_captured = SDL_GetTicks();
 
-                        game->fruits[i]->is_sliced = 1;
+                        game->logos[i]->is_captured = 1;
 
                         game->points += 100;
-                        // todo more points in function of number of fruits sliced (combos)
+                        // todo more points in function of number of logos sliced (combos)
                     }
                 }
             }
@@ -271,12 +271,12 @@ int main(int argc, char *argv[])
         // events
         pn_events_update(&quit, game);
 
-        // new fruit
+        // new logo
         if (utils_rand_int(0, 1000) < 25)
-           fruit_append(game->fruits, fruit_new(game->models[utils_rand_int(0, game->loaded_models)]));
+           logo_append(game->logos, logo_new(game->models[utils_rand_int(0, game->loaded_models)]));
 
         // update physics
-        fruit_update_all(game);
+        logo_update_all(game);
         pn_check_all_collisions(game);
 
         /*
@@ -291,10 +291,10 @@ int main(int argc, char *argv[])
         // title, score, ...
         utils_blit_hud(game);
 
-        // fruits, lines and knife
-        fruit_blit_all(game);
+        // logos, lines and net
+        logo_blit_all(game);
         line_blit_all(game);
-        utils_blit_at(game->knife, game->renderer, game->mouse.x-game->knife_size.x/4, game->mouse.y-game->knife_size.y/3);
+        utils_blit_at(game->net, game->renderer, game->mouse.x-game->net_size.x/4, game->mouse.y-game->net_size.y/3);
 
         // render
         SDL_RenderPresent(game->renderer);
