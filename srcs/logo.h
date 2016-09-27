@@ -4,11 +4,11 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-#define LOGO_MODELS_COUNT      10
-#define LOGOS_COUNT            10
+#define LOGO_MODELS_COUNT       10
+#define LOGOS_COUNT             10
 #define LINES_COUNT             100
 #define BOUNCE_COEFF            0.75
-#define LOGO_RADIUS            50
+#define LOGO_RADIUS             50
 
 
 typedef struct      _s_logo_model {
@@ -27,14 +27,6 @@ typedef struct      _s_logo {
 
     s_logo_model   *model;
 }                   s_logo;
-
-typedef struct      _s_line {
-    int x1, y1, x2, y2;
-    int dx, dy;                                     // lenght in x and y. Auto calculated from coordinates
-    float a, b;                                     // equation y = a*x+b. Auto calculated from coordinates
-    float norm;                                     // auto calculated from coordinates
-    Uint32 timestamp;                               // creation timestamp
-}                   s_line;
 
 typedef struct      _s_vector {
     int x, y;
@@ -56,8 +48,7 @@ typedef struct      _s_game {
     int             points;
     int             last_logo_captured;             // timestamp. Used for combos
     s_vector        mouse;
-    s_logo         *logos[LOGOS_COUNT];             // active logos (~ shown)
-    s_line          *lines[LINES_COUNT];            // active lines
+    s_logo          *logos[LOGOS_COUNT];            // active logos (~ shown)
 }                   s_game;
 
 

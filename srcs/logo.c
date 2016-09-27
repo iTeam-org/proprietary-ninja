@@ -7,7 +7,7 @@
 #include <SDL2/SDL_image.h>
 
 #include "utils.h"
-#include "fruit.h"
+#include "logo.h"
 
 /*
     logo model

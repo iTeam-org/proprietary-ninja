@@ -2,7 +2,7 @@
 #define UTILS_H_INCLUDED
 
 #include <SDL2/SDL.h>
-#include "fruit.h"
+#include "logo.h"
 
 #define SCREEN_WIDTH                800
 #define SCREEN_HEIGHT               600
