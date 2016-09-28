@@ -23,9 +23,10 @@ typedef struct      _s_logo {
     float sx, sy;                                   // speed
     float ax, ay;                                   // acceleration
 
-    int is_captured;
+    int             is_captured;
+    Uint32          captured_timestamp;
 
-    s_logo_model   *model;
+    s_logo_model    *model;
 }                   s_logo;
 
 typedef struct      _s_vector {

@@ -40,13 +40,30 @@ SDL_Texture *utils_load_texture(SDL_Renderer *game_renderer, char *filepath)
 
 void utils_blit_at(SDL_Texture *src, SDL_Renderer *dst, int x, int y)
 {
-    SDL_Rect pos;
+    int w = 0, h = 0;
 
-    pos.x = x;
-    pos.y = y;
-    SDL_QueryTexture(src, NULL, NULL, &pos.w, &pos.h);
+    SDL_QueryTexture(src, NULL, NULL, &w, &h);
+    utils_blit_atsize(src, dst, x, y, w, h);
+}
 
-    SDL_RenderCopy(dst, src, NULL, &pos);
+void utils_blit_atzoom(SDL_Texture *src, SDL_Renderer *dst, int x, int y, float zoom)
+{
+    int w = 0, h = 0;
+
+    SDL_QueryTexture(src, NULL, NULL, &w, &h);
+    utils_blit_atsize(src, dst, x, y, w*zoom, h*zoom);
+}
+
+void utils_blit_atsize(SDL_Texture *src, SDL_Renderer *dst, int x, int y, int w, int h)
+{
+    SDL_Rect dstrect;
+
+    dstrect.x = x;
+    dstrect.y = y;
+    dstrect.w = w;
+    dstrect.h = h;
+
+    SDL_RenderCopy(dst, src, NULL, &dstrect);
 }
 
 void utils_blit_hud(s_game *game)

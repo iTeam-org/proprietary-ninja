@@ -16,6 +16,8 @@
 int utils_rand_int(int min, int max);
 SDL_Texture *utils_load_texture(SDL_Renderer *game_renderer, char *filepath);
 void utils_blit_at(SDL_Texture *src, SDL_Renderer *dst, int x, int y);
+void utils_blit_atzoom(SDL_Texture *src, SDL_Renderer *dst, int x, int y, float zoom);
+void utils_blit_atsize(SDL_Texture *src, SDL_Renderer *dst, int x, int y, int w, int h);
 void utils_blit_hud(s_game *game);
 
 #endif

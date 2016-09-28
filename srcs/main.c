@@ -93,7 +93,7 @@ s_game *pn_init(void)
         Miscs
     */
 
-    game->lives = 3;
+    game->lives = 5;
 
     return game;
 }
@@ -190,19 +190,30 @@ int pn_check_collision(s_logo *logo, s_vector mouse)
 void pn_check_all_collisions(s_game *game)
 {
     int i = 0;
+    Uint32 now = 0;
+
+    now = SDL_GetTicks();
 
     for (i = 0; i < LOGOS_COUNT; ++i)
     {
-        if (game->logos[i] != NULL)
+        if ((game->logos[i] != NULL) && !game->logos[i]->is_captured)
         {
             if (pn_check_collision(game->logos[i], game->mouse))
             {
-                game->last_logo_captured = SDL_GetTicks();
-
                 game->logos[i]->is_captured = 1;
 
-                game->points += 100;
-                // todo more points in function of number of logos sliced (combos)
+                if (!game->logos[i]->model->is_open_source)
+                {
+                    game->lives --;
+                }
+                else
+                {
+                    game->logos[i]->captured_timestamp = now;
+
+                    game->points += 100;
+                    game->last_logo_captured = now;
+                    // todo more points in function of number of logos sliced (combos)
+                }
             }
         }
     }
@@ -233,6 +244,9 @@ int main(int argc, char *argv[])
         // update physics
         logo_update_all(game);
         pn_check_all_collisions(game);
+
+        if (game->lives == 0)
+            printf("todo - you just lost\n");
 
         /*
             screen

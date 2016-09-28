@@ -137,13 +137,13 @@ void logo_update_all(s_game *game)
             }
 
             // if under the floor, remove it from the list of active logos
-            if (
-                (logos[i]->y - radius >= SCREEN_HEIGHT)
-                && (! logos[i]->is_captured)
-            )
+            if (logos[i]->y - radius >= SCREEN_HEIGHT)
             {
-                if (logos[i]->model->is_open_source) // missed a logo
-                    game->lives --;
+                if (! logos[i]->is_captured)
+                {
+                    if (logos[i]->model->is_open_source)
+                        game->lives --;
+                }
 
                 free(logos[i]);
                 logos[i] = NULL;
@@ -160,15 +160,34 @@ void logo_blit_all(s_game *game)
     {
         if (game->logos[i] != NULL)
         {
-            if (game->logos[i]->is_captured)
-                SDL_SetTextureColorMod(game->logos[i]->model->img, 128, 128, 128);
-            else
-                SDL_SetTextureColorMod(game->logos[i]->model->img, 255, 255, 255);
+            if (game->logos[i]->is_captured && !game->logos[i]->model->is_open_source)
+            {
+                SDL_SetTextureColorMod(game->logos[i]->model->img, 64, 64, 64);
 
-            utils_blit_at(
-                game->logos[i]->model->img, game->renderer,
-                game->logos[i]->x - game->logos[i]->model->radius, game->logos[i]->y - game->logos[i]->model->radius
-            );
+                utils_blit_at(
+                    game->logos[i]->model->img, game->renderer,
+                    game->logos[i]->x - game->logos[i]->model->radius, game->logos[i]->y - game->logos[i]->model->radius
+                );
+
+                SDL_SetTextureColorMod(game->logos[i]->model->img, 255, 255, 255);
+            }
+            else
+            {
+                float size = 1;  // default zoom is 1 - no modification
+
+                if (game->logos[i]->is_captured)
+                    size = 1 - (1.0 * (SDL_GetTicks() - game->logos[i]->captured_timestamp) / 500);
+
+                if ((0 <= size) && (size <= 1))
+                {
+
+                    utils_blit_atzoom(
+                        game->logos[i]->model->img, game->renderer,
+                        game->logos[i]->x - game->logos[i]->model->radius, game->logos[i]->y - game->logos[i]->model->radius,
+                        size
+                    );
+                }
+            }
         }
     }
 }
