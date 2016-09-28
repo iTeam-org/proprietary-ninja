@@ -20,4 +20,6 @@ void utils_blit_atzoom(SDL_Texture *src, SDL_Renderer *dst, int x, int y, float 
 void utils_blit_atsize(SDL_Texture *src, SDL_Renderer *dst, int x, int y, int w, int h);
 void utils_blit_hud(s_game *game);
 
+void utils_text(SDL_Renderer *renderer, TTF_Font *font, char *buffer, int x, int y);
+
 #endif

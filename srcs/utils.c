@@ -68,20 +68,20 @@ void utils_blit_atsize(SDL_Texture *src, SDL_Renderer *dst, int x, int y, int w,
 
 void utils_blit_hud(s_game *game)
 {
-    SDL_Surface *text = NULL;
     char buffer[1024];
 
-    text = TTF_RenderText_Blended(game->font_title, "Proprietary ninja", TEXT_COLOR);
-    utils_blit_at(SDL_CreateTextureFromSurface(game->renderer, text), game->renderer, 200, 20); // todo enhance this
-    SDL_FreeSurface(text);
-
+    utils_text(game->renderer, game->font_title, "Proprietary ninja", 200, 20);
     sprintf(buffer, "%d live(s)", game->lives);
-    text = TTF_RenderText_Blended(game->font_text, buffer, TEXT_COLOR);
-    utils_blit_at(SDL_CreateTextureFromSurface(game->renderer, text), game->renderer, 20, 60); // todo enhance this
-    SDL_FreeSurface(text);
+    utils_text(game->renderer, game->font_text, buffer, 20, 60);
+    sprintf(buffer, "%5d point(s)", game->points);
+    utils_text(game->renderer, game->font_text, buffer, SCREEN_WIDTH-190, 60);
+}
 
-    sprintf(buffer, "%d point(s)", game->points);
-    text = TTF_RenderText_Blended(game->font_text, buffer, TEXT_COLOR);
-    utils_blit_at(SDL_CreateTextureFromSurface(game->renderer, text), game->renderer, SCREEN_WIDTH-text->w-20, 60); // todo enhance this
+void utils_text(SDL_Renderer *renderer, TTF_Font *font, char *buffer, int x, int y)
+{
+    SDL_Surface *text = NULL;
+
+    text = TTF_RenderText_Blended(font, buffer, TEXT_COLOR);
+    utils_blit_at(SDL_CreateTextureFromSurface(renderer, text), renderer, x, y);
     SDL_FreeSurface(text);
 }

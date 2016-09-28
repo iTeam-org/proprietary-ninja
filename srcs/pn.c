@@ -138,7 +138,7 @@ void pn_events_handle_movement(s_game *game, int x, int y, int xrel, int yrel)
     game->mouse.y = y;
 }
 
-void pn_events_update(int *quit, s_game *game)
+void pn_events_update(int *quit, s_game *game, int *key_down)
 {
     SDL_Event e;
 
@@ -151,6 +151,9 @@ void pn_events_update(int *quit, s_game *game)
                 break;
 
             case SDL_KEYDOWN:
+                if (key_down)
+                    *key_down = 1;
+
                 switch (e.key.keysym.sym)
                 {
                     case SDLK_q:
@@ -164,11 +167,13 @@ void pn_events_update(int *quit, s_game *game)
                 break;
 
             case SDL_MOUSEMOTION:
-                pn_events_handle_movement(game, e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
+                if (game != NULL)
+                    pn_events_handle_movement(game, e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
                 break;
 
             case SDL_FINGERMOTION:
-                pn_events_handle_movement(game, e.tfinger.x, e.tfinger.y, e.tfinger.dx, e.tfinger.dy);
+                if (game != NULL)
+                    pn_events_handle_movement(game, e.tfinger.x, e.tfinger.y, e.tfinger.dx, e.tfinger.dy);
                 break;
 
             default:
@@ -231,7 +236,7 @@ int pn_main(s_game *game)
         timestamp = SDL_GetTicks();
 
         // events
-        pn_events_update(&quit, game);
+        pn_events_update(&quit, game, NULL);
 
         // new logo
         if (utils_rand_int(0, 1000) < 25)
@@ -270,6 +275,71 @@ int pn_main(s_game *game)
     }
 }
 
+void menu(s_game *game)
+{
+    int quit = 0;
+    int i = 0, logo_open_source = 0, logo_proprio = 0;
+
+    while (!quit)
+    {
+        pn_events_update(&quit, NULL, &quit);
+
+        // bg
+        SDL_SetRenderDrawColor(game->renderer, 200, 200, 200, SDL_ALPHA_OPAQUE);
+        SDL_RenderClear(game->renderer);
+
+        // titles
+
+#define OS_X            100
+#define OS_Y            100
+#define PROPRIO_X       100
+#define PROPRIO_Y       400
+#define LOGOS_PER_LINE  6
+#define LOGO_MARGIN     50
+
+        utils_text(game->renderer, game->font_title, "Open source", 50, OS_Y);
+        utils_text(game->renderer, game->font_title, "Closed source", 50, PROPRIO_Y);
+
+        // logos
+        logo_open_source = 0;
+        logo_proprio = 0;
+
+        for (i = 0; i < LOGO_MODELS_COUNT; ++i)
+        {
+            if (game->models[i] == NULL)
+                continue;
+
+            if (game->models[i]->is_open_source)
+            {
+                utils_blit_at(
+                    game->models[i]->img,
+                    game->renderer,
+                    OS_X + (logo_open_source % LOGOS_PER_LINE) * (game->models[i]->radius + LOGO_MARGIN),
+                    OS_Y + 50 + (logo_open_source / LOGOS_PER_LINE) * (game->models[i]->radius + LOGO_MARGIN)
+                );
+
+                logo_open_source ++;
+            }
+            else
+            {
+                utils_blit_at(
+                    game->models[i]->img,
+                    game->renderer,
+                    PROPRIO_X + (logo_proprio % LOGOS_PER_LINE) * (game->models[i]->radius + LOGO_MARGIN),
+                    PROPRIO_Y + 50 + (logo_proprio / LOGOS_PER_LINE) * (game->models[i]->radius + LOGO_MARGIN)
+                );
+
+                logo_proprio ++;
+            }
+        }
+
+        // render
+        SDL_RenderPresent(game->renderer);
+
+        SDL_Delay(1000/FPS);
+    }
+}
+
 int main(void)
 {
     s_game *game;
@@ -277,7 +347,7 @@ int main(void)
     srand(42);
     game = pn_init();
 
-
+    menu(game);
     pn_main(game);
 
 
