@@ -9,6 +9,10 @@
 #include "logo.h"
 
 
+#define SLEEP_AFTER_LOST    3000
+#define LIVE_COUNT          5
+
+
 s_game *pn_init(void)
 {
     s_game *game = NULL;
@@ -93,7 +97,7 @@ s_game *pn_init(void)
         Miscs
     */
 
-    game->lives = 5;
+    game->lives = LIVE_COUNT;
 
     return game;
 }
@@ -215,13 +219,45 @@ void pn_check_all_collisions(s_game *game)
                 {
                     game->logos[i]->captured_timestamp = now;
 
+                    printf("Captured\n");
                     game->points += 100;
+
+                    if (now - game->last_logo_captured < 500)
+                    {
+                        printf("Combo !\n");
+                        game->points += 100;
+                    }
+
                     game->last_logo_captured = now;
-                    // todo more points in function of number of logos sliced (combos)
                 }
             }
         }
     }
+}
+
+void you_just_lost(s_game *game)
+{
+    SDL_Rect rect;
+
+    printf("todo - you just lost\n");
+
+    SDL_SetRenderDrawColor(game->renderer, 128, 128, 128, 128);
+
+    rect.x = SCREEN_WIDTH/2-200;
+    rect.y = SCREEN_HEIGHT/2-50;
+    rect.w = 2*200;
+    rect.h = 2*50;
+    SDL_RenderFillRect(game->renderer, &rect);
+
+    utils_text(game->renderer, game->font_title, "You just lost !", SCREEN_WIDTH/2, SCREEN_HEIGHT/2-10, TEXT_ALIGN_CENTER);
+
+    SDL_RenderPresent(game->renderer);
+
+    SDL_Delay(SLEEP_AFTER_LOST);
+
+    pn_free(game);
+
+    exit(0);
 }
 
 
@@ -247,7 +283,7 @@ int pn_main(s_game *game)
         pn_check_all_collisions(game);
 
         if (game->lives == 0)
-            printf("todo - you just lost\n");
+            you_just_lost(game);
 
         /*
             screen
@@ -297,8 +333,8 @@ void menu(s_game *game)
 #define LOGOS_PER_LINE  6
 #define LOGO_MARGIN     50
 
-        utils_text(game->renderer, game->font_title, "Open source", 50, OS_Y);
-        utils_text(game->renderer, game->font_title, "Closed source", 50, PROPRIO_Y);
+        utils_text(game->renderer, game->font_title, "Open source", 50, OS_Y, TEXT_ALIGN_LEFT);
+        utils_text(game->renderer, game->font_title, "Closed source", 50, PROPRIO_Y, TEXT_ALIGN_LEFT);
 
         // logos
         logo_open_source = 0;

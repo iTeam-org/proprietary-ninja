@@ -70,18 +70,35 @@ void utils_blit_hud(s_game *game)
 {
     char buffer[1024];
 
-    utils_text(game->renderer, game->font_title, "Proprietary ninja", 200, 20);
+    utils_text(game->renderer, game->font_title, "Proprietary ninja", SCREEN_WIDTH/2, 20, TEXT_ALIGN_CENTER);
     sprintf(buffer, "%d live(s)", game->lives);
-    utils_text(game->renderer, game->font_text, buffer, 20, 60);
+    utils_text(game->renderer, game->font_text, buffer, 20, 60, TEXT_ALIGN_LEFT);
     sprintf(buffer, "%5d point(s)", game->points);
-    utils_text(game->renderer, game->font_text, buffer, SCREEN_WIDTH-190, 60);
+    utils_text(game->renderer, game->font_text, buffer, SCREEN_WIDTH-20, 60, TEXT_ALIGN_RIGHT);
 }
 
-void utils_text(SDL_Renderer *renderer, TTF_Font *font, char *buffer, int x, int y)
+void utils_text(SDL_Renderer *renderer, TTF_Font *font, char *buffer, int x, int y, s_text_align align)
 {
     SDL_Surface *text = NULL;
+    int dx = 0;
 
     text = TTF_RenderText_Blended(font, buffer, TEXT_COLOR);
-    utils_blit_at(SDL_CreateTextureFromSurface(renderer, text), renderer, x, y);
+
+    switch (align)
+    {
+        case TEXT_ALIGN_LEFT:
+            // nothing
+            break;
+
+        case TEXT_ALIGN_CENTER:
+            dx -= text->w/2;
+            break;
+
+        case TEXT_ALIGN_RIGHT:
+            dx -= text->w;
+            break;
+    }
+
+    utils_blit_at(SDL_CreateTextureFromSurface(renderer, text), renderer, x+dx, y);
     SDL_FreeSurface(text);
 }
