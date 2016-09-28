@@ -220,15 +220,11 @@ void pn_check_all_collisions(s_game *game)
 }
 
 
-int main(int argc, char *argv[])
+int pn_main(s_game *game)
 {
-    s_game *game;
     Uint32 timestamp = 0;
     int should_sleep = 0;
     int quit = 0;
-
-    srand(42);
-    game = pn_init();
 
     while (!quit)
     {
@@ -272,6 +268,18 @@ int main(int argc, char *argv[])
         if (should_sleep > 0)
             SDL_Delay(should_sleep);
     }
+}
+
+int main(void)
+{
+    s_game *game;
+
+    srand(42);
+    game = pn_init();
+
+
+    pn_main(game);
+
 
     pn_free(game);
 
