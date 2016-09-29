@@ -59,6 +59,7 @@ void logo_model_append(s_game *game, s_logo_model *new)
 s_logo *logo_new(s_logo_model *model, s_vector window_size)
 {
     s_logo *ret = NULL;
+    int min_sy = 0, max_sy = 0;
 
     ret = malloc(sizeof(s_logo));
     if (ret == NULL)
@@ -69,10 +70,18 @@ s_logo *logo_new(s_logo_model *model, s_vector window_size)
 
     ret->x = utils_rand_int(0, window_size.x);
     ret->y = window_size.y-0;
-    ret->sx = utils_rand_int(-25, 25);
-    ret->sy = utils_rand_int(-30, -15);
+    ret->sx = utils_rand_int(-20, 20);
+
+    min_sy = -window_size.y/40;
+    max_sy = -15;
+    if (max_sy < min_sy)
+    {
+        printf("shit. %s %s %d\n", __FUNCTION__, __FILE__, __LINE__);
+        exit(1);
+    }
+    ret->sy = utils_rand_int(min_sy, max_sy);
     ret->ax = 0;
-    ret->ay = 1;
+    ret->ay = 0.5;
     ret->is_captured = 0;
     ret->model = model;
 

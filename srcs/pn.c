@@ -178,6 +178,11 @@ void pn_events_update(int *quit, s_game *game, int *key_down)
                     pn_events_handle_movement(game, e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
                 break;
 
+            case SDL_FINGERDOWN:
+                if (key_down)
+                    *key_down = 1;
+                break;
+
             case SDL_FINGERMOTION:
                 if (game != NULL)
                     pn_events_handle_movement(game, e.tfinger.x, e.tfinger.y, e.tfinger.dx, e.tfinger.dy);
