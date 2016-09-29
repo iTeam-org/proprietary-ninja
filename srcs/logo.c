@@ -56,7 +56,7 @@ void logo_model_append(s_game *game, s_logo_model *new)
     logo
 */
 
-s_logo *logo_new(s_logo_model *model)
+s_logo *logo_new(s_logo_model *model, s_vector window_size)
 {
     s_logo *ret = NULL;
 
@@ -67,8 +67,8 @@ s_logo *logo_new(s_logo_model *model)
         exit(1);
     }
 
-    ret->x = utils_rand_int(0, SCREEN_WIDTH);
-    ret->y = SCREEN_HEIGHT-0;
+    ret->x = utils_rand_int(0, window_size.x);
+    ret->y = window_size.y-0;
     ret->sx = utils_rand_int(-25, 25);
     ret->sy = utils_rand_int(-30, -15);
     ret->ax = 0;
@@ -130,14 +130,14 @@ void logo_update_all(s_game *game)
                 logos[i]->x = - (logos[i]->x - radius) + radius;
                 logos[i]->sx = -BOUNCE_COEFF * logos[i]->sx;
             }
-            if (logos[i]->x + radius >= SCREEN_WIDTH)
+            if (logos[i]->x + radius >= game->window_size.x)
             {
-                logos[i]->x = SCREEN_WIDTH - radius - (logos[i]->x + radius - SCREEN_WIDTH);
+                logos[i]->x = game->window_size.x - radius - (logos[i]->x + radius - game->window_size.x);
                 logos[i]->sx = -BOUNCE_COEFF * logos[i]->sx;
             }
 
             // if under the floor, remove it from the list of active logos
-            if (logos[i]->y - radius >= SCREEN_HEIGHT)
+            if (logos[i]->y - radius >= game->window_size.y)
             {
                 if (! logos[i]->is_captured)
                 {

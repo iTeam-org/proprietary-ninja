@@ -34,6 +34,7 @@ typedef struct      _s_vector {
 }                   s_vector;
 
 typedef struct      _s_game {
+    s_vector        window_size;
     SDL_Window      *window;
     SDL_Renderer    *renderer;
 
@@ -56,7 +57,7 @@ typedef struct      _s_game {
 s_logo_model *logo_model_new(SDL_Renderer *game_renderer, int is_open_source, char *name);
 void logo_model_append(s_game *game, s_logo_model *new);
 
-s_logo *logo_new(s_logo_model *model);
+s_logo *logo_new(s_logo_model *model, s_vector window_size);
 void logo_append(s_logo **logos, s_logo *new);
 void logo_update_all(s_game *game);
 void logo_blit_all(s_game *game);

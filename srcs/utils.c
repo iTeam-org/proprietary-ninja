@@ -70,11 +70,11 @@ void utils_blit_hud(s_game *game)
 {
     char buffer[1024];
 
-    utils_text(game->renderer, game->font_title, "Proprietary ninja", SCREEN_WIDTH/2, 20, TEXT_ALIGN_CENTER);
+    utils_text(game->renderer, game->font_title, GAME_TITLE, game->window_size.x/2, 30, TEXT_ALIGN_CENTER);
     sprintf(buffer, "%d live(s)", game->lives);
     utils_text(game->renderer, game->font_text, buffer, 20, 60, TEXT_ALIGN_LEFT);
     sprintf(buffer, "%5d point(s)", game->points);
-    utils_text(game->renderer, game->font_text, buffer, SCREEN_WIDTH-20, 60, TEXT_ALIGN_RIGHT);
+    utils_text(game->renderer, game->font_text, buffer, game->window_size.x-20, 60, TEXT_ALIGN_RIGHT);
 }
 
 void utils_text(SDL_Renderer *renderer, TTF_Font *font, char *buffer, int x, int y, s_text_align align)

@@ -44,10 +44,10 @@ s_game *pn_init(void)
     */
 
     game->window = SDL_CreateWindow(
-        "Open Source Ninja",
+        GAME_TITLE,
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        SCREEN_WIDTH, SCREEN_HEIGHT,
-        SDL_WINDOW_SHOWN
+        DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT,
+        SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN_DESKTOP
     );
     if (game->window == NULL)
     {
@@ -98,6 +98,9 @@ s_game *pn_init(void)
     */
 
     game->lives = LIVE_COUNT;
+
+    SDL_GetWindowSize(game->window, &game->window_size.x, &game->window_size.y);
+    printf("Window size: %d %d\n", game->window_size.x, game->window_size.y);
 
     return game;
 }
@@ -243,13 +246,16 @@ void you_just_lost(s_game *game)
 
     SDL_SetRenderDrawColor(game->renderer, 128, 128, 128, 128);
 
-    rect.x = SCREEN_WIDTH/2-200;
-    rect.y = SCREEN_HEIGHT/2-50;
+    rect.x = game->window_size.x/2-200;
+    rect.y = game->window_size.y/2-50;
     rect.w = 2*200;
     rect.h = 2*50;
     SDL_RenderFillRect(game->renderer, &rect);
 
-    utils_text(game->renderer, game->font_title, "You just lost !", SCREEN_WIDTH/2, SCREEN_HEIGHT/2-10, TEXT_ALIGN_CENTER);
+    utils_text(
+        game->renderer, game->font_title, "You just lost !",
+        game->window_size.x/2, game->window_size.y/2-10, TEXT_ALIGN_CENTER
+    );
 
     SDL_RenderPresent(game->renderer);
 
@@ -276,7 +282,7 @@ int pn_main(s_game *game)
 
         // new logo
         if (utils_rand_int(0, 1000) < 25)
-           logo_append(game->logos, logo_new(game->models[utils_rand_int(0, game->loaded_models)]));
+           logo_append(game->logos, logo_new(game->models[utils_rand_int(0, game->loaded_models)], game->window_size));
 
         // update physics
         logo_update_all(game);
@@ -292,7 +298,7 @@ int pn_main(s_game *game)
         // bg
         SDL_SetRenderDrawColor(game->renderer, 128, 128, 128, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(game->renderer);
-        utils_blit_at(game->background, game->renderer, 0, 100);
+        utils_blit_atsize(game->background, game->renderer, 0, 100, game->window_size.x, game->window_size.y-100);
 
         // title, score, ...
         utils_blit_hud(game);

@@ -4,8 +4,9 @@
 #include <SDL2/SDL.h>
 #include "logo.h"
 
-#define SCREEN_WIDTH                800
-#define SCREEN_HEIGHT               600
+#define DEFAULT_SCREEN_WIDTH        800
+#define DEFAULT_SCREEN_HEIGHT       600
+#define GAME_TITLE                  "Open Source Ninja"
 #define FPS                         25
 #define TEXT_COLOR                  (SDL_Color){0, 0, 0}
 
