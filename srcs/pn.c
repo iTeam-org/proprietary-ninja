@@ -227,14 +227,10 @@ void pn_check_all_collisions(s_game *game)
                 {
                     game->logos[i]->captured_timestamp = now;
 
-                    printf("Captured\n");
                     game->points += 100;
 
                     if (now - game->last_logo_captured < 500)
-                    {
-                        printf("Combo !\n");
                         game->points += 100;
-                    }
 
                     game->last_logo_captured = now;
                 }
@@ -246,8 +242,6 @@ void pn_check_all_collisions(s_game *game)
 void you_just_lost(s_game *game)
 {
     SDL_Rect rect;
-
-    printf("todo - you just lost\n");
 
     SDL_SetRenderDrawColor(game->renderer, 128, 128, 128, 128);
 
@@ -317,6 +311,7 @@ int pn_main(s_game *game)
 
         // sleep
         should_sleep = 1000/FPS - (SDL_GetTicks() - timestamp);
+        printf("\t\t\t\tshould_sleep: %d ms (should be ~ %d)\n", should_sleep, 1000/FPS);
         if (should_sleep > 0)
             SDL_Delay(should_sleep);
     }

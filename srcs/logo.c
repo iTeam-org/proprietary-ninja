@@ -70,9 +70,9 @@ s_logo *logo_new(s_logo_model *model, s_vector window_size)
 
     ret->x = utils_rand_int(0, window_size.x);
     ret->y = window_size.y-0;
-    ret->sx = utils_rand_int(-20, 20);
+    ret->sx = utils_rand_int(-15, 15);
 
-    min_sy = -window_size.y/40;
+    min_sy = -window_size.y/30;
     max_sy = -15;
     if (max_sy < min_sy)
     {
